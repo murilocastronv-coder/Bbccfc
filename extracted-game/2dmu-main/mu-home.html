@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#130f1d">
+<title>MuOnlineClaude — MMORPG pixel no navegador</title>
+<meta name="description" content="MU Online em pixel art, direto no navegador. Escolha sua classe, suba até o nível 1000 e jogue com amigos no PC ou no celular. Grátis.">
+<meta property="og:title" content="MuOnlineClaude — MMORPG pixel no navegador">
+<meta property="og:description" content="Dark Knight, Dark Wizard, Elf e Summoner em pixel art. Jogue grátis no PC e no celular.">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:dark;
+  --night:#130f1d; --ink:#1c1630; --ink2:#251d3d; --line:#3b2f5c;
+  --gold:#e3bd6c; --ember:#e0642a; --text:#efe7d4; --muted:#a99fb8;
+  --dk:#d8452c; --dw:#3f8cff; --elf:#52b848; --sum:#a65cf0;
+  --pix:'Pixelify Sans','Courier New',monospace; --body:'Alegreya Sans','Segoe UI',system-ui,sans-serif;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--night);color:var(--text);font:400 18px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:4px}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+canvas{image-rendering:pixelated;image-rendering:crisp-edges}
+
+/* topo */
+header.top{position:sticky;top:0;z-index:20;background:rgba(19,15,29,.9);backdrop-filter:blur(8px);border-bottom:2px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;gap:22px;height:60px}
+.logo{font:700 22px var(--pix);color:var(--gold);text-decoration:none;letter-spacing:.5px;margin-right:auto}
+header.top nav{display:flex;gap:20px}
+header.top nav a{text-decoration:none;color:var(--muted);font-weight:500}
+header.top nav a:hover{color:var(--text)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:700 18px var(--pix);text-decoration:none;padding:12px 22px;border:3px solid #000;border-radius:0;cursor:pointer;
+  box-shadow:0 4px 0 #000;transition:transform .08s,box-shadow .08s;min-height:48px}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #000}
+.btn.play{background:var(--gold);color:#2a1a08}
+.btn.play:hover{background:#f0cf86}
+.btn.alt{background:var(--ink2);color:var(--text);border-color:var(--line);box-shadow:0 4px 0 var(--line)}
+.btn.alt:hover{background:#2f2650}
+header.top .btn{padding:8px 16px;min-height:40px;font-size:16px}
+
+/* hero */
+.hero{padding:44px 0 64px;background:
+  linear-gradient(180deg,rgba(19,15,29,0) 60%,var(--night)),
+  radial-gradient(900px 420px at 80% 10%,rgba(166,92,240,.22),transparent 70%),
+  radial-gradient(700px 400px at 5% 90%,rgba(216,69,44,.16),transparent 70%)}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:40px;align-items:center}
+.hero h1{font:700 clamp(36px,5.6vw,66px)/1.02 var(--pix);margin:0 0 18px;color:var(--text);text-wrap:balance}
+.hero p.lead{font-size:21px;color:#d8cfe6;margin:0 0 26px;max-width:30em}
+.cta{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:22px}
+.facts{display:flex;flex-wrap:wrap;gap:8px 22px;color:var(--muted);font-size:16px;margin:0;padding:0;list-style:none}
+.facts li::before{content:"";display:inline-block;width:8px;height:8px;background:var(--gold);margin-right:8px;vertical-align:1px}
+
+.stage{background:var(--ink);border:3px solid #000;box-shadow:0 0 0 3px var(--line),0 18px 50px rgba(0,0,0,.5);padding:10px}
+.stage canvas#st{display:block;width:100%;height:auto;aspect-ratio:480/270;background:#2c4a24}
+.picker{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.picker .cls{flex:1 1 0;min-width:64px;background:var(--ink2);border:3px solid var(--line);padding:6px 4px 4px;color:var(--text);cursor:pointer;font:500 15px var(--body);display:flex;flex-direction:column;align-items:center;gap:2px}
+.picker .cls canvas{width:44px;height:48px}
+.picker .cls[aria-pressed="true"]{border-color:var(--c);background:#2f2650;box-shadow:inset 0 0 0 2px var(--c)}
+.ctrls{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center}
+.ctrls button{font:500 16px var(--body);background:var(--ink2);color:var(--text);border:2px solid var(--line);padding:6px 12px;min-height:40px;cursor:pointer}
+.ctrls button[aria-pressed="true"]{background:var(--gold);color:#2a1a08;border-color:#000}
+.ctrls .sep{flex:1}
+.sets{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:15px}
+.sets button{width:40px;height:40px;padding:0;border:2px solid var(--line);background:var(--ink2);display:grid;place-items:center}
+.sets button[aria-pressed="true"]{border-color:var(--gold);background:#2f2650}
+.sets canvas{width:30px;height:34px}
+
+/* seções */
+section.band{padding:72px 0}
+section.alt{background:var(--ink);border-top:3px solid #000;border-bottom:3px solid #000}
+h2{font:700 clamp(28px,3.6vw,42px)/1.1 var(--pix);margin:0 0 12px}
+.sub{color:var(--muted);max-width:36em;margin:0 0 34px;font-size:19px}
+
+/* classes */
+.classes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.card{background:var(--night);border:3px solid #000;box-shadow:0 0 0 3px var(--c);display:flex;flex-direction:column}
+.card header{padding:12px 14px;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 55%,#000),#0c0914);display:flex;align-items:center;gap:12px;border-bottom:3px solid #000}
+.card header canvas{width:46px;height:50px;flex:none;background:rgba(0,0,0,.35);border:2px solid #000}
+.card h3{font:700 20px/1.1 var(--pix);margin:0}
+.card header span{font-size:15px;color:#e5dcef}
+.card .body{padding:14px;display:flex;flex-direction:column;gap:12px;flex:1}
+.card p{margin:0;font-size:16px;color:#d8cfe6}
+.strip{display:flex;gap:4px;align-items:flex-end;background:rgba(0,0,0,.3);padding:8px;min-height:84px}
+.strip{overflow:hidden}
+.strip canvas{flex:1 1 0;min-width:0;width:100%;height:70px;object-fit:contain;object-position:bottom}
+.card .lab{font-size:14px;color:var(--muted);margin:0 0 -6px}
+.more{margin-top:20px;color:var(--muted);font-size:17px}
+
+/* mapas */
+.maps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.map{border:3px solid #000;box-shadow:0 0 0 3px var(--line);background:var(--night)}
+.map canvas{display:block;width:100%;height:auto;aspect-ratio:160/96}
+.map div{padding:10px 12px}
+.map b{font:700 18px var(--pix);display:block}
+.map span{font-size:15px;color:var(--muted)}
+
+/* recursos */
+.feats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px 30px}
+.feats h3{font:700 20px var(--pix);margin:0 0 6px;color:var(--gold)}
+.feats p{margin:0;color:#d8cfe6;font-size:17px}
+
+/* chamada final */
+.final{text-align:center;padding:84px 0}
+.final h2{font-size:clamp(30px,4.4vw,52px)}
+.final p{color:var(--muted);margin:0 auto 26px;max-width:28em}
+.final .cta{justify-content:center}
+footer{border-top:3px solid #000;background:#0c0914;padding:26px 0;color:var(--muted);font-size:16px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:12px 26px;align-items:center}
+footer .sp{flex:1}
+footer a{text-decoration:none}footer a:hover{color:var(--text);text-decoration:underline}
+
+@media (max-width:980px){
+  .hero .wrap{grid-template-columns:1fr}
+  .classes,.maps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .feats{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:620px){
+  header.top nav{display:none}
+  .classes,.maps,.feats{grid-template-columns:1fr}
+  .hero{padding-top:28px}
+  section.band{padding:52px 0}
+  .picker .cls{min-width:calc(50% - 8px)}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" href="/">MuOnlineClaude</a>
+  <nav aria-label="Seções"><a href="#classes">Classes</a><a href="#mapas">Mapas</a><a href="#recursos">Recursos</a><a href="/mercado">Mercado</a><a href="/status">Status</a></nav>
+  <a class="btn play" href="/jogar">Jogar</a>
+</div></header>
+
+<main>
+<section class="hero"><div class="wrap">
+  <div>
+    <h1>MU Online em pixel art, direto no navegador</h1>
+    <p class="lead">Escolha sua classe, suba até o nível 1000 e explore oito mapas com outros jogadores. Sem instalar nada, no PC ou no celular.</p>
+    <div class="cta"><a class="btn play" href="/jogar?criar=1">Criar conta e jogar</a><a class="btn alt" href="/jogar">Já tenho conta</a></div>
+    <ul class="facts"><li>Grátis</li><li>Multiplayer em tempo real</li><li>PC e celular</li></ul>
+  </div>
+  <div class="stage" aria-label="Demonstração dos personagens">
+    <canvas id="st" width="480" height="270" role="img" aria-label="Personagem em pixel art andando, atacando e usando habilidade"></canvas>
+    <div class="picker" id="picker" role="group" aria-label="Classe"></div>
+    <div class="ctrls">
+      <div role="group" aria-label="Ação" id="acts" style="display:flex;gap:8px;flex-wrap:wrap">
+        <button data-a="auto" aria-pressed="true">Automático</button><button data-a="idle" aria-pressed="false">Parado</button><button data-a="run" aria-pressed="false">Andar</button><button data-a="attack" aria-pressed="false">Atacar</button><button data-a="skill" aria-pressed="false">Habilidade</button>
+      </div>
+      <span class="sep"></span>
+      <div class="sets" role="group" aria-label="Set de armadura" id="sets"><span>Set</span></div>
+      <button id="wingBtn" aria-pressed="false">Asas</button>
+    </div>
+  </div>
+</div></section>
+
+<section class="band alt" id="classes"><div class="wrap">
+  <h2>Quatro classes, cada uma com seu estilo</h2>
+  <p class="sub">Cada classe tem quatro sets de armadura, armas e asas próprios, e uma habilidade com efeito visual.</p>
+  <div class="classes" id="classGrid"></div>
+  <p class="more">O jogo também tem Magic Gladiator e Dark Lord.</p>
+</div></section>
+
+<section class="band" id="mapas"><div class="wrap">
+  <h2>Oito mapas para explorar</h2>
+  <p class="sub">Comece em Lorencia e siga até Tarkan e a Arena, enfrentando monstros e chefes mais fortes a cada região.</p>
+  <div class="maps" id="mapGrid"></div>
+</div></section>
+
+<section class="band alt" id="recursos"><div class="wrap">
+  <h2>O que você encontra no jogo</h2>
+  <p class="sub">Tudo roda no navegador e usa a mesma conta no PC e no celular.</p>
+  <div class="feats">
+    <div><h3>Progressão até o nível 1000</h3><p>Suba de nível, distribua pontos, faça resets e acompanhe seu personagem no ranking.</p></div>
+    <div><h3>Equipamentos que aparecem no corpo</h3><p>Armaduras, armas e asas mudam o visual do seu herói e dos outros jogadores.</p></div>
+    <div><h3>Mercado entre jogadores</h3><p>Compre e venda itens com outros jogadores e acompanhe as ofertas no mercado.</p></div>
+    <div><h3>Guilds</h3><p>Crie ou entre em uma guild para jogar em grupo.</p></div>
+    <div><h3>Montarias e asas</h3><p>Ande de montaria pelos mapas e equipe asas para mostrar seu progresso.</p></div>
+    <div><h3>Multiplayer ao vivo</h3><p>Veja outros jogadores se mover, atacar e conversar em tempo real.</p></div>
+  </div>
+</div></section>
+
+<section class="final"><div class="wrap">
+  <h2>Seu herói está esperando</h2>
+  <p>Crie a conta em menos de um minuto e comece em Lorencia.</p>
+  <div class="cta"><a class="btn play" href="/jogar?criar=1">Criar conta e jogar</a><a class="btn alt" href="/mercado">Ver o mercado</a></div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <span>MuOnlineClaude</span><span class="sp"></span>
+  <a href="https://discord.gg/bSEx5JYUF7" rel="noopener">Discord</a>
+  <a href="https://chat.whatsapp.com/L0So9O3B3A0KhpuKNTAVtn?s=cl&amp;p=a&amp;mlu=4&amp;ilr=4&amp;iam=0" rel="noopener">WhatsApp</a>
+  <a href="/status">Status do servidor</a>
+  <a href="/jogar?senha=1">Esqueci a senha</a>
+</div></footer>
+
+<script>
+if(/[?&](reset|pago)=/.test(location.search))location.replace('/jogar'+location.search);   // links de e-mail e pagamento continuam levando ao jogo
+(function(){
+'use strict';
+var MF={"dkn":{"file":"mu-spr-dkn.png","game":"vanguard","idle":[[0,0,54,90],[55,0,55,90],[111,0,49,77],[161,0,55,90]],"walk":[[217,0,55,75],[273,0,45,78],[319,0,46,68],[366,0,44,78],[411,0,44,78]],"atk":[[456,0,74,73],[531,0,63,72],[0,91,64,71]],"atkfx":[[65,91,78,76]],"skl":[[144,91,77,76],[222,91,78,77]],"sklfx":[[301,91,108,96],[410,91,118,97]],"set":[[529,91,73,109],[0,201,71,108],[72,201,69,89],[142,201,71,110]],"wpn":[[214,201,74,104],[289,201,56,105],[346,201,60,104],[407,201,49,104],[457,201,51,104],[509,201,49,104]],"wing":[[0,312,94,92],[95,312,94,84],[190,312,94,89],[285,312,94,84]],"ico":[[380,312,49,65],[430,312,54,68],[485,312,57,69],[543,312,40,57]]},"dwz":{"file":"mu-spr-dwz.png","game":"arcanist","idle":[[0,0,52,90],[53,0,53,89],[107,0,54,89],[162,0,52,89]],"walk":[[215,0,51,74],[267,0,51,75],[319,0,50,74],[370,0,46,74],[417,0,43,74]],"atk":[[461,0,72,72],[534,0,67,72]],"atkfx":[[0,91,70,88],[71,91,72,92]],"skl":[[144,91,77,81]],"sklfx":[[222,91,87,95],[310,91,197,98]],"set":[[508,91,66,107],[0,199,66,109],[67,199,67,108],[135,199,66,110]],"wpn":[[202,199,46,103],[249,199,48,103],[298,199,47,103],[346,199,46,103],[393,199,45,103],[439,199,46,106]],"wing":[[486,199,84,88],[0,310,94,75],[95,310,92,78],[188,310,85,83]],"ico":[[274,310,59,64],[334,310,58,68],[393,310,60,67],[454,310,59,64]]},"elf":{"file":"mu-spr-elf.png","game":"ranger","idle":[[0,0,62,90],[63,0,60,89],[124,0,53,89],[178,0,62,89]],"walk":[[241,0,62,74],[304,0,55,76],[360,0,48,77],[409,0,43,77],[453,0,44,78]],"atk":[[498,0,71,72],[570,0,64,72]],"atkfx":[[0,91,67,68],[68,91,69,76]],"skl":[[138,91,81,74]],"sklfx":[[220,91,85,70],[306,91,82,72],[389,91,89,97]],"set":[[479,91,66,108],[546,91,72,108],[0,200,71,108],[72,200,70,109]],"wpn":[[143,200,56,104],[200,200,54,105],[255,200,55,104],[311,200,53,105],[365,200,55,104]],"wing":[[421,200,85,85],[507,200,85,87],[0,310,86,89],[87,310,85,86]],"ico":[[173,310,62,65],[236,310,62,65],[299,310,63,65],[363,310,62,65]]},"sum":{"file":"mu-spr-sum.png","game":"summoner","idle":[[0,0,53,90],[54,0,52,89],[107,0,53,89],[161,0,53,89]],"walk":[[215,0,39,64],[255,0,42,74],[298,0,46,74],[345,0,43,74],[389,0,42,74]],"atk":[[432,0,73,72],[506,0,61,72]],"atkfx":[[568,0,56,82],[0,91,60,85]],"skl":[[61,91,71,75]],"sklfx":[[133,91,89,83],[223,91,102,81],[326,91,91,97]],"set":[[418,91,67,107],[486,91,69,109],[556,91,66,107],[0,201,66,107]],"wpn":[[67,201,50,98],[118,201,51,101],[170,201,57,104],[228,201,47,103],[276,201,50,103]],"wing":[[327,201,87,82],[415,201,94,80],[510,201,72,90],[0,309,81,83]],"ico":[[82,309,60,64],[143,309,55,65],[199,309,56,65],[256,309,57,67]]}};
+var ORDER=['dkn','dwz','elf','sum'];
+var INFO={dkn:{n:'Dark Knight',r:'Guerreiro · Força',c:'#d8452c',t:'Armadura pesada e golpes de espada em arco. Ideal para ficar na linha de frente.'},
+ dwz:{n:'Dark Wizard',r:'Mago · Magia',c:'#3f8cff',t:'Cajado, feitiços de área e explosões de cristal. Dano alto de longe.'},
+ elf:{n:'Fairy Elf',r:'Arqueira · Agilidade',c:'#52b848',t:'Arco rápido e chuva de flechas. Mobilidade e dano à distância.'},
+ sum:{n:'Summoner',r:'Invocadora · Suporte',c:'#a65cf0',t:'Magias sombrias e círculos arcanos que apoiam o grupo.'}};
+var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+var SC=.9, A={}, cur='dkn', set=0, wing=false, mode='auto';
+
+/* ---------- carregar atlas ---------- */
+function crop(img,r,sc){var c=document.createElement('canvas');c.width=Math.max(1,Math.round(r[2]*sc));c.height=Math.max(1,Math.round(r[3]*sc));
+  var g=c.getContext('2d');g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';g.drawImage(img,r[0],r[1],r[2],r[3],0,0,c.width,c.height);return c;}
+function avg(c){try{var d=c.getContext('2d').getImageData(0,0,c.width,c.height).data,r=0,g=0,b=0,n=0;for(var i=0;i<d.length;i+=4){if(d[i+3]>200){var mx=Math.max(d[i],d[i+1],d[i+2]),mn=Math.min(d[i],d[i+1],d[i+2]);if(mx>70&&mx-mn>25){r+=d[i];g+=d[i+1];b+=d[i+2];n++;}}}return n?'rgb('+(r/n|0)+','+(g/n|0)+','+(b/n|0)+')':null;}catch(e){return null;}}
+var pending=ORDER.length;
+ORDER.forEach(function(k){var m=MF[k],img=new Image();
+  img.onload=function(){var o={m:m};['idle','walk','atk','atkfx','skl','sklfx','set','wpn','wing'].forEach(function(g){o[g]=(m[g]||[]).map(function(r){return crop(img,r,SC);});});
+    o.ico=(m.ico||[]).map(function(r){return crop(img,r,1);});o.avg=o.idle.map(avg);o.big={set:(m.set||[]).map(function(r){return crop(img,r,.8);}),wpn:(m.wpn||[]).map(function(r){return crop(img,r,.8);}),wing:(m.wing||[]).map(function(r){return crop(img,r,.8);})};
+    A[k]=o;if(--pending===0)ready();};
+  img.onerror=function(){if(--pending===0)ready();};img.src=m.file;});
+
+/* ---------- cenário do palco ---------- */
+var W=480,H=270,bg=document.createElement('canvas');bg.width=W;bg.height=H;
+function rnd(s){return function(){s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+(function(){var g=bg.getContext('2d'),r=rnd(7);
+  for(var y=0;y<H;y+=16)for(var x=0;x<W;x+=16){var t=r();g.fillStyle=t<.5?'#3c6a2e':t<.8?'#437535':'#376328';g.fillRect(x,y,16,16);
+    if(t>.86){g.fillStyle='#5c9a48';g.fillRect(x+4,y+6,2,4);g.fillRect(x+9,y+4,2,3);}}
+  g.fillStyle='#8a6a42';g.fillRect(0,176,W,36);g.fillStyle='#a07c4e';for(var x2=0;x2<W;x2+=12){g.fillRect(x2,180+((x2/12)%3)*8,6,3);}
+  g.fillStyle='#6e5232';g.fillRect(0,176,W,3);g.fillRect(0,209,W,3);
+  function tree(x,y,s){g.fillStyle='rgba(0,0,0,.25)';g.fillRect(x-14*s,y-2,28*s,6*s);g.fillStyle='#5a3a1e';g.fillRect(x-3*s,y-22*s,6*s,22*s);
+    [['#1f5a2a',0,-38,15],['#2a7a38',-6,-34,11],['#37933f',5,-44,9]].forEach(function(c){g.fillStyle=c[0];g.beginPath();g.arc(x+c[1]*s,y+c[2]*s,c[3]*s,0,7);g.fill();});}
+  tree(52,150,1);tree(130,138,.8);tree(380,146,1.1);tree(452,132,.85);tree(300,128,.7);
+  g.fillStyle='#7a7a86';[[90,238,10],[420,236,12]].forEach(function(p){g.beginPath();g.ellipse(p[0],p[1],p[2],p[2]*.55,0,0,7);g.fill();g.fillStyle='#a4a4b2';g.fillRect(p[0]-p[2]*.5,p[1]-p[2]*.45,p[2]*.5,2);g.fillStyle='#7a7a86';});
+  var v=g.createRadialGradient(W/2,H/2,H*.4,W/2,H/2,W*.62);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(10,6,20,.5)');g.fillStyle=v;g.fillRect(0,0,W,H);})();
+
+/* ---------- desenho do herói (mesmas regras do jogo) ---------- */
+var TC=new WeakMap();
+function tint(c,col,a){if(!col)return c;var m=TC.get(c);if(!m)TC.set(c,m={});var k=col+a;if(m[k])return m[k];var t=document.createElement('canvas');t.width=c.width;t.height=c.height;var g=t.getContext('2d');g.drawImage(c,0,0);g.globalCompositeOperation='source-atop';g.globalAlpha=a;g.fillStyle=col;g.fillRect(0,0,t.width,t.height);return m[k]=t;}
+var FL=new WeakMap();function flip(c){var f=FL.get(c);if(f)return f;f=document.createElement('canvas');f.width=c.width;f.height=c.height;var g=f.getContext('2d');g.translate(c.width,0);g.scale(-1,1);g.drawImage(c,0,0);FL.set(c,f);return f;}
+var hx=140,face=1,t0=performance.now(),seq=[['idle',1.5],['run',2.4],['attack',1],['skill',1.3],['idle',.8],['run',2],['attack',1],['skill',1.3]],sq=0,sqT=0,last=t0;
+function bodyFrame(o,id,u,now){
+  if(id==='attack'){var n=o.atk.length;return o.atk[Math.min(n-1,(u*n)|0)];}
+  if(id==='skill'){var n2=o.skl.length;return o.skl[Math.min(n2-1,(u*n2)|0)];}
+  if(id==='run'){var ph=((now*9)|0)&1;return o.walk[ph&&o.walk.length>1&&cur==='dkn'?1:0];}
+  return o.idle[set]||o.idle[0];}
+function drawHero(g,o,x,y,id,u,now){
+  var c=bodyFrame(o,id,u,now),pose=id!=='idle';
+  if(pose&&set>0&&o.avg[set])c=tint(c,o.avg[set],.28);
+  var moving=id==='run',bob=moving?(((now*9)|0)&1?-1:0):(Math.sin(now*2.4)>.55?-1:0),w=c.width,h=c.height,fl=(face<0&&pose)?flip(c):c;
+  g.fillStyle='rgba(0,0,0,.35)';g.beginPath();g.ellipse(x,y+1,14,5,0,0,7);g.fill();
+  if(wing&&o.wing.length){var wc=o.wing[set%o.wing.length],f=((now*(moving?7:2.5))%3)|0,ww=Math.round(wc.width*[1,.88,.96][f]);g.drawImage(wc,x-ww/2,y+2-h*.92-bob,ww,wc.height);}
+  g.drawImage(fl,Math.round(x-w/2),Math.round(y+2-h-bob));
+  if((id==='attack'||id==='skill')&&u>.28&&u<.9){var L=id==='attack'?o.atkfx:o.sklfx;if(L.length){var k=(u-.28)/.62,fx=L[Math.min(L.length-1,(k*L.length)|0)],ff=face<0?flip(fx):fx;
+    g.save();g.globalCompositeOperation='lighter';g.globalAlpha=Math.max(0,1-k*.55);g.drawImage(ff,Math.round(x+face*(Math.max(14,fx.width*.4)+10)-fx.width/2),Math.round(y+2-h*.5-fx.height/2-bob));g.restore();}}
+}
+var cv=document.getElementById('st'),cx=cv.getContext('2d');cx.imageSmoothingEnabled=false;
+function frame(ts){
+  var now=ts/1000,dt=Math.min(.05,(ts-last)/1000);last=ts;var o=A[cur];
+  cx.drawImage(bg,0,0);
+  if(o){var id,u;
+    if(mode==='auto'){sqT+=dt;if(sqT>=seq[sq][1]){sqT=0;sq=(sq+1)%seq.length;}id=seq[sq][0];u=sqT/seq[sq][1];}
+    else{id=mode;var dur=id==='attack'?1:id==='skill'?1.3:1;u=(now%dur)/dur;}
+    if(id==='run'){hx+=face*70*dt;if(hx>400){face=-1;}if(hx<80){face=1;}}
+    drawHero(cx,o,Math.round(hx),204,id,u,now);}
+  if(!reduce||!o)requestAnimationFrame(frame);}
+function still(){var o=A[cur];if(!o)return;cx.drawImage(bg,0,0);drawHero(cx,o,Math.round(hx),204,mode==='auto'?'idle':mode,.5,1.3);}
+function go(){if(reduce){still();}else requestAnimationFrame(frame);}
+
+/* ---------- controles ---------- */
+function buildPicker(){var p=document.getElementById('picker');p.innerHTML='';
+  ORDER.forEach(function(k){if(!A[k])return;var b=document.createElement('button');b.className='cls';b.type='button';b.style.setProperty('--c',INFO[k].c);b.setAttribute('aria-pressed',k===cur);
+    var c=document.createElement('canvas');var ic=A[k].ico[0];c.width=44;c.height=48;var g=c.getContext('2d');g.imageSmoothingQuality='high';var s=Math.min(44/ic.width,48/ic.height);g.drawImage(ic,(44-ic.width*s)/2,(48-ic.height*s)/2,ic.width*s,ic.height*s);
+    b.appendChild(c);b.appendChild(document.createTextNode(INFO[k].n));
+    b.onclick=function(){cur=k;set=Math.min(set,3);buildPicker();buildSets();if(reduce)still();};p.appendChild(b);});}
+function buildSets(){var s=document.getElementById('sets');s.innerHTML='<span>Set</span>';var o=A[cur];
+  for(var i=0;i<4;i++)(function(i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Set '+(i+1));b.setAttribute('aria-pressed',i===set);
+    var c=document.createElement('canvas'),src=o.big.set[i];c.width=30;c.height=34;var g=c.getContext('2d');g.imageSmoothingQuality='high';var k=Math.min(30/src.width,34/src.height);g.drawImage(src,(30-src.width*k)/2,(34-src.height*k)/2,src.width*k,src.height*k);
+    b.appendChild(c);b.onclick=function(){set=i;buildSets();if(reduce)still();};s.appendChild(b);})(i);}
+document.getElementById('acts').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;mode=b.dataset.a;[].forEach.call(this.children,function(x){x.setAttribute('aria-pressed',x===b);});if(reduce)still();});
+var wb=document.getElementById('wingBtn');wb.onclick=function(){wing=!wing;wb.setAttribute('aria-pressed',wing);if(reduce)still();};
+
+/* ---------- cartões das classes ---------- */
+function strip(list,label){var d=document.createElement('div');var l=document.createElement('p');l.className='lab';l.textContent=label;var s=document.createElement('div');s.className='strip';
+  list.forEach(function(c){var n=document.createElement('canvas');n.width=c.width;n.height=c.height;n.getContext('2d').drawImage(c,0,0);s.appendChild(n);});d.appendChild(l);d.appendChild(s);return d;}
+function buildCards(){var g=document.getElementById('classGrid');
+  ORDER.forEach(function(k){var o=A[k];if(!o)return;var i=INFO[k],c=document.createElement('article');c.className='card';c.style.setProperty('--c',i.c);
+    var h=document.createElement('header'),ic=document.createElement('canvas');ic.width=46;ic.height=50;var q=ic.getContext('2d');q.imageSmoothingQuality='high';var s=Math.min(46/o.ico[0].width,50/o.ico[0].height);q.drawImage(o.ico[0],(46-o.ico[0].width*s)/2,(50-o.ico[0].height*s)/2,o.ico[0].width*s,o.ico[0].height*s);
+    var tt=document.createElement('div');tt.innerHTML='<h3></h3><span></span>';tt.querySelector('h3').textContent=i.n;tt.querySelector('span').textContent=i.r;h.appendChild(ic);h.appendChild(tt);c.appendChild(h);
+    var b=document.createElement('div');b.className='body';var p=document.createElement('p');p.textContent=i.t;b.appendChild(p);
+    b.appendChild(strip(o.big.set,'Sets de armadura'));b.appendChild(strip(o.big.wpn.slice(0,5),'Armas'));b.appendChild(strip(o.big.wing,'Asas'));c.appendChild(b);g.appendChild(c);});}
+
+/* ---------- mapas em pixel ---------- */
+var MAPS=[
+ ['Lorencia','Campos verdes e a cidade inicial','#437535','#3c6a2e','tree'],
+ ['Noria','Floresta das elfas','#4f8a52','#46794a','tree2'],
+ ['Devias','Neve e vento gelado','#dfe9f2','#c8d8e6','pine'],
+ ['Dungeon','Corredores de pedra e tochas','#4a4658','#413d4f','torch'],
+ ['Lost Tower','Torre sombria de vários andares','#3a2a52','#32244a','tower'],
+ ['Atlans','Ruínas debaixo d’água','#1f5f8f','#1a5582','coral'],
+ ['Tarkan','Deserto de dunas e cactos','#c9a35d','#bb9650','cactus'],
+ ['Arena','Duelos entre jogadores','#8a6a42','#7c5e3a','arena']];
+function dio(cv,m){var g=cv.getContext('2d'),r=rnd(m[0].length*97+3),W2=160,H2=96;
+  for(var y=0;y<H2;y+=8)for(var x=0;x<W2;x+=8){g.fillStyle=r()<.55?m[2]:m[3];g.fillRect(x,y,8,8);}
+  function sh(x,y,w){g.fillStyle='rgba(0,0,0,.25)';g.fillRect(x-w/2,y,w,3);}
+  var k=m[4];
+  if(k==='tree'||k==='tree2'){[[30,60],[78,40],[124,64],[104,84]].forEach(function(p){sh(p[0],p[1],20);g.fillStyle='#5a3a1e';g.fillRect(p[0]-2,p[1]-14,4,14);g.fillStyle=k==='tree'?'#2a7a38':'#6ab86a';g.beginPath();g.arc(p[0],p[1]-20,11,0,7);g.fill();g.fillStyle=k==='tree'?'#37933f':'#8fd68a';g.beginPath();g.arc(p[0]-3,p[1]-23,6,0,7);g.fill();});
+    if(k==='tree2'){g.fillStyle='#ff9ac4';for(var i=0;i<8;i++)g.fillRect(8+i*19,80+(i%3)*4,3,3);}else{g.fillStyle='#d8c8a8';g.fillRect(60,66,36,20);g.fillStyle='#b0503a';g.fillRect(56,58,44,10);}}
+  if(k==='pine'){[[26,62],[74,48],[120,66],[100,86]].forEach(function(p){sh(p[0],p[1],18);g.fillStyle='#5a3a1e';g.fillRect(p[0]-2,p[1]-6,4,6);for(var i=0;i<3;i++){g.fillStyle='#2f6a50';g.beginPath();g.moveTo(p[0],p[1]-30+i*8);g.lineTo(p[0]-12+i*2,p[1]-6-(2-i)*0-4+i*0);g.lineTo(p[0]+12-i*2,p[1]-6);g.fill();g.fillStyle='#fff';g.fillRect(p[0]-5+i*2,p[1]-26+i*8,10-i*3,3);}});}
+  if(k==='torch'){g.fillStyle='#2a2736';for(var x3=0;x3<W2;x3+=32)g.fillRect(x3,0,4,H2);[[40,30],[120,30]].forEach(function(p){g.fillStyle='#6a4a2a';g.fillRect(p[0],p[1],4,14);g.fillStyle='#ff8a2a';g.beginPath();g.arc(p[0]+2,p[1]-3,6,0,7);g.fill();g.fillStyle='#ffd060';g.beginPath();g.arc(p[0]+2,p[1]-2,3,0,7);g.fill();g.fillStyle='rgba(255,138,42,.18)';g.beginPath();g.arc(p[0]+2,p[1],26,0,7);g.fill();});}
+  if(k==='tower'){g.fillStyle='#1c1230';g.fillRect(62,8,36,78);g.fillStyle='#2c1c48';g.fillRect(62,8,12,78);for(var y4=18;y4<80;y4+=14){g.fillStyle='#d8a0ff';g.fillRect(76,y4,6,8);}g.fillStyle='#1c1230';for(var x5=62;x5<98;x5+=12)g.fillRect(x5,2,8,8);}
+  if(k==='coral'){for(var i2=0;i2<9;i2++){var x6=10+i2*17,h2=14+(i2*7%18);g.fillStyle=i2%2?'#ff7a9a':'#ffb05a';g.fillRect(x6,86-h2,5,h2);g.fillRect(x6-4,86-h2+4,4,3);g.fillRect(x6+5,86-h2+8,4,3);}g.fillStyle='rgba(180,230,255,.35)';for(var i3=0;i3<14;i3++)g.fillRect((i3*37)%150,(i3*23)%80,2,2);}
+  if(k==='cactus'){[[34,66],[100,56],[132,82]].forEach(function(p){sh(p[0],p[1],14);g.fillStyle='#3f7a3a';g.fillRect(p[0]-3,p[1]-22,6,22);g.fillRect(p[0]-10,p[1]-16,4,8);g.fillRect(p[0]-10,p[1]-16,7,3);g.fillRect(p[0]+6,p[1]-12,4,8);g.fillRect(p[0]+3,p[1]-12,7,3);});g.fillStyle='#b58a44';g.beginPath();g.ellipse(70,86,40,6,0,0,7);g.fill();}
+  if(k==='arena'){g.strokeStyle='#d8b878';g.lineWidth=4;g.beginPath();g.ellipse(80,52,56,34,0,0,7);g.stroke();g.fillStyle='#c0301c';g.fillRect(14,18,4,26);g.fillRect(18,18,12,10);g.fillStyle='#2f64c8';g.fillRect(142,18,4,26);g.fillRect(130,18,12,10);}
+  var v=g.createLinearGradient(0,H2*.6,0,H2);v.addColorStop(0,'rgba(0,0,0,0)');v.addColorStop(1,'rgba(10,6,20,.35)');g.fillStyle=v;g.fillRect(0,0,W2,H2);}
+(function(){var g=document.getElementById('mapGrid');MAPS.forEach(function(m){var d=document.createElement('div');d.className='map';var c=document.createElement('canvas');c.width=160;c.height=96;c.setAttribute('role','img');c.setAttribute('aria-label','Mapa '+m[0]);dio(c,m);
+  var t=document.createElement('div');t.innerHTML='<b></b><span></span>';t.querySelector('b').textContent=m[0];t.querySelector('span').textContent=m[1];d.appendChild(c);d.appendChild(t);g.appendChild(d);});})();
+
+function ready(){if(!A[cur])return;buildPicker();buildSets();buildCards();go();}
+})();
+</script>
+</body>
+</html>
